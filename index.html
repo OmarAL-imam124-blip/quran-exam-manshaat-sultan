@@ -1,0 +1,343 @@
+import React, { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+
+// --- أيقونات SVG ---
+const BookOpenIcon = ({ className }) => (
+  <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13c-1.168.776-2.754 1.253-4.5 1.253s-3.332-.477-4.5-1.253" />
+  </svg>
+);
+
+const ArrowRightIcon = ({ className }) => (
+  <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
+  </svg>
+);
+
+// --- بيانات النماذج (محدثة بالكامل وفقًا للضوابط الجديدة) ---
+const modelsData = [
+  {
+    id: 1, title: "النموذج (1)",
+    questions: [
+      { label: "من أول السورة", text: "من قوله تعالى: الْحَاقَّةُ... إلى قوله تعالى: ...خَاوِيَةٍ (من الآية 1 إلى الآية 7)", sura: "الحاقة", url: "https://quran.com/ar/69/1-7" },
+      { label: "من آخر السورة", text: "من قوله تعالى: إِنَّا خَلَقْنَاهُم مِّمَّا يَعْلَمُونَ... إلى قوله تعالى: ...يُوفَضُونَ (من الآية 39 إلى الآية 44)", sura: "المعارج", url: "https://quran.com/ar/70/39-44" },
+      { label: "من وسط السورة", text: "من قوله تعالى: فَقُلْتُ اسْتَغْفِرُوا رَبَّكُمْ... إلى قوله تعالى: ...أَطْوَارًا (من الآية 10 إلى الآية 14)", sura: "نوح", url: "https://quran.com/ar/71/10-14" },
+      { label: "سؤال مشهور", text: "من قوله تعالى: فَأَمَّا مَنْ أُوتِيَ كِتَابَهُ بِيَمِينِهِ... إلى قوله تعالى: ...فِي الْأَيَّامِ الْخَالِيَةِ (من الآية 19 إلى الآية 24)", sura: "الحاقة", url: "https://quran.com/ar/69/19-24" },
+      { label: "من أول ربع", text: "من قوله تعالى: قُلْ أُوحِيَ إِلَيَّ... إلى قوله تعالى: ...عَلَى اللَّهِ كَذِبًا (من الآية 1 إلى الآية 5)", sura: "الجن", url: "https://quran.com/ar/72/1-5" }
+    ]
+  },
+  {
+    id: 2, title: "النموذج (2)",
+    questions: [
+      { label: "من أول السورة", text: "من قوله تعالى: سَأَلَ سَائِلٌ بِعَذَابٍ وَاقِعٍ... إلى قوله تعالى: ...صَبْرًا جَمِيلًا (من الآية 1 إلى الآية 5)", sura: "المعارج", url: "https://quran.com/ar/70/1-5" },
+      { label: "من آخر السورة", text: "من قوله تعالى: مِّمَّا خَطِيئَاتِهِمْ أُغْرِقُوا... إلى قوله تعالى: ...إِلَّا تَبَارًا (من الآية 25 إلى الآية 28)", sura: "نوح", url: "https://quran.com/ar/71/25-28" },
+      { label: "من وسط السورة", text: "من قوله تعالى: وَأَمَّا مَنْ أُوتِيَ كِتَابَهُ بِشِمَالِهِ... إلى قوله تعالى: ...ثُمَّ الْجَحِيمَ صَلُّوهُ (من الآية 25 إلى الآية 31)", sura: "الحاقة", url: "https://quran.com/ar/69/25-31" },
+      { label: "سؤال مشهور", text: "من قوله تعالى: وَأَنَّا لَمَسْنَا السَّمَاءَ... إلى قوله تعالى: ...شِهَابًا رَّصَدًا (من الآية 8 إلى الآية 9)", sura: "الجن", url: "https://quran.com/ar/72/8-9" },
+      { label: "من أول ربع", text: "من قوله تعالى: فَلَا أُقْسِمُ بِمَا تُبْصِرُونَ... إلى قوله تعالى: ...مِن رَّبِّ الْعَالَمِينَ (من الآية 38 إلى الآية 43)", sura: "الحاقة", url: "https://quran.com/ar/69/38-43" }
+    ]
+  },
+  {
+    id: 3, title: "النموذج (3)",
+    questions: [
+      { label: "من أول السورة", text: "من قوله تعالى: إِنَّا أَرْسَلْنَا نُوحًا... إلى قوله تعالى: ...عَذَابٌ أَلِيمٌ (من الآية 1 إلى الآية 4)", sura: "نوح", url: "https://quran.com/ar/71/1-4" },
+      { label: "من آخر السورة", text: "من قوله تعالى: قُلْ إِنْ أَدْرِي أَقَرِيبٌ... إلى قوله تعالى: ...أَحْصَىٰ كُلَّ شَيْءٍ عَدَدًا (من الآية 25 إلى الآية 28)", sura: "الجن", url: "https://quran.com/ar/72/25-28" },
+      { label: "من وسط السورة", text: "من قوله تعالى: يُبَصَّرُونَهُمْ ۚ يَوَدُّ الْمُجْرِمُ... إلى قوله تعالى: ...وَفَصِيلَتِهِ الَّتِي تُؤْوِيهِ (من الآية 11 إلى الآية 13)", sura: "المعارج", url: "https://quran.com/ar/70/11-13" },
+      { label: "سؤال مشهور", text: "من قوله تعالى: فَإِذَا نُفِخَ فِي الصُّورِ... إلى قوله تعالى: ...لَا تَخْفَىٰ مِنكُمْ خَافِيَةٌ (من الآية 13 إلى الآية 18)", sura: "الحاقة", url: "https://quran.com/ar/69/13-18" },
+      { label: "من أول ربع", text: "من قوله تعالى: إِنَّ الْإِنسَانَ خُلِقَ هَلُوعًا... إلى قوله تعالى: ...وَالْمَحْرُومِ (من الآية 19 إلى الآية 25)", sura: "المعارج", url: "https://quran.com/ar/70/19-25" }
+    ]
+  },
+  {
+    id: 4, title: "النموذج (4)",
+    questions: [
+      { label: "من أول السورة", text: "من قوله تعالى: قُلْ أُوحِيَ إِلَيَّ... إلى قوله تعالى: ...صَاحِبَةً وَلَا وَلَدًا (من الآية 1 إلى الآية 3)", sura: "الجن", url: "https://quran.com/ar/72/1-3" },
+      { label: "من آخر السورة", text: "من قوله تعالى: وَلَوْ تَقَوَّلَ عَلَيْنَا... إلى قوله تعالى: ...لِلْمُتَّقِينَ (من الآية 44 إلى الآية 48)", sura: "الحاقة", url: "https://quran.com/ar/69/44-48" },
+      { label: "من وسط السورة", text: "من قوله تعالى: قَالَ نُوحٌ رَّبِّ إِنَّهُمْ عَصَوْنِي... إلى قوله تعالى: ...إِلَّا خَسَارًا (من الآية 21 إلى الآية 24)", sura: "نوح", url: "https://quran.com/ar/71/21-24" },
+      { label: "سؤال مشهور", text: "من قوله تعالى: إِنَّهُمْ يَرَوْنَهُ بَعِيدًا... إلى قوله تعالى: ...حَمِيمًا (من الآية 6 إلى الآية 10)", sura: "المعارج", url: "https://quran.com/ar/70/6-10" },
+      { label: "من أول ربع", text: "من قوله تعالى: قُلْ إِنَّمَا أَدْعُو رَبِّي... إلى قوله تعالى: ...يَجِد لَّهُ نَاصِرًا (من الآية 20 إلى الآية 24)", sura: "الجن", url: "https://quran.com/ar/72/20-24" }
+    ]
+  },
+  {
+    id: 5, title: "النموذج (5)",
+    questions: [
+      { label: "من أول السورة", text: "من قوله تعالى: كَذَّبَتْ ثَمُودُ وَعَادٌ... إلى قوله تعالى: ...عَاتِيَةٍ (من الآية 4 إلى الآية 6)", sura: "الحاقة", url: "https://quran.com/ar/69/4-6" },
+      { label: "من آخر السورة", text: "من قوله تعالى: وَالَّذِينَ هُمْ لِأَمَانَاتِهِمْ... إلى قوله تعالى: ...مُّكْرَمُونَ (من الآية 32 إلى الآية 35)", sura: "المعارج", url: "https://quran.com/ar/70/32-35" },
+      { label: "من وسط السورة", text: "من قوله تعالى: وَأَنَّا مِنَّا الصَّالِحُونَ... إلى قوله تعالى: ...وَلَا رَهَقًا (من الآية 11 إلى الآية 13)", sura: "الجن", url: "https://quran.com/ar/72/11-13" },
+      { label: "سؤال مشهور", text: "من قوله تعالى: وَاللَّهُ جَعَلَ لَكُمُ الْأَرْضَ بِسَاطًا... إلى قوله تعالى: ...سُبُلًا فِجَاجًا (من الآية 19 إلى الآية 20)", sura: "نوح", url: "https://quran.com/ar/71/19-20" },
+      { label: "من أول ربع", text: "من قوله تعالى: إِنَّ الْإِنسَانَ خُلِقَ هَلُوعًا... إلى قوله تعالى: ...يُؤْمِنُونَ (من الآية 19 إلى الآية 27)", sura: "المعارج", url: "https://quran.com/ar/70/19-27" }
+    ]
+  },
+  {
+    id: 6, title: "النموذج (6)",
+    questions: [
+      { label: "من أول السورة", text: "من قوله تعالى: سَأَلَ سَائِلٌ بِعَذَابٍ وَاقِعٍ... إلى قوله تعالى: ...خَمْسِينَ أَلْفَ سَنَةٍ (من الآية 1 إلى الآية 4)", sura: "المعارج", url: "https://quran.com/ar/70/1-4" },
+      { label: "من آخر السورة", text: "من قوله تعالى: إِنَّهُ لَقَوْلُ رَسُولٍ كَرِيمٍ... إلى قوله تعالى: ...الْعَظِيمِ (من الآية 40 إلى الآية 52)", sura: "الحاقة", url: "https://quran.com/ar/69/40-52" },
+      { label: "من وسط السورة", text: "من قوله تعالى: أَلَمْ تَرَوْا كَيْفَ خَلَقَ اللَّهُ... إلى قوله تعالى: ...إِنبَاتًا (من الآية 15 إلى الآية 18)", sura: "نوح", url: "https://quran.com/ar/71/15-18" },
+      { label: "سؤال مشهور", text: "من قوله تعالى: وَأَنَّهُ كَانَ رِجَالٌ مِّنَ الْإِنسِ... إلى قوله تعالى: ...أَحَدًا (من الآية 6 إلى الآية 7)", sura: "الجن", url: "https://quran.com/ar/72/6-7" },
+      { label: "من أول ربع", text: "من قوله تعالى: فَلَا أُقْسِمُ بِمَا تُبْصِرُونَ... إلى قوله تعالى: ...الْأَقَاوِيلِ (من الآية 38 إلى الآية 44)", sura: "الحاقة", url: "https://quran.com/ar/69/38-44" }
+    ]
+  },
+    {
+    id: 7, title: "النموذج (7)",
+    questions: [
+      { label: "من أول السورة", text: "من قوله تعالى: إِنَّا أَرْسَلْنَا نُوحًا... إلى قوله تعالى: ...نذِيرٌ مُّبِينٌ (من الآية 1 إلى الآية 2)", sura: "نوح", url: "https://quran.com/ar/71/1-2" },
+      { label: "من آخر السورة", text: "من قوله تعالى: قُلْ إِنَّمَا أَدْعُو رَبِّي... إلى قوله تعالى: ...مِن دُونِهِ مُلْتَحَدًا (من الآية 20 إلى الآية 22)", sura: "الجن", url: "https://quran.com/ar/72/20-22" },
+      { label: "من وسط السورة", text: "من قوله تعالى: إِنَّهُ كَانَ لَا يُؤْمِنُ بِاللَّهِ... إلى قوله تعالى: ...إِلَّا الْخَاطِئُونَ (من الآية 33 إلى الآية 37)", sura: "الحاقة", url: "https://quran.com/ar/69/33-37" },
+      { label: "سؤال مشهور", text: "من قوله تعالى: وَالَّذِينَ هُمْ عَلَىٰ صَلَاتِهِمْ... إلى قوله تعالى: ...مُّكْرَمُونَ (من الآية 34 إلى الآية 35)", sura: "المعارج", url: "https://quran.com/ar/70/34-35" },
+      { label: "من أول ربع", text: "من قوله تعالى: قُلْ أُوحِيَ إِلَيَّ... إلى قوله تعالى: ...كَذِبًا (من الآية 1 إلى الآية 5)", sura: "الجن", url: "https://quran.com/ar/72/1-5" }
+    ]
+  },
+  {
+    id: 8, title: "النموذج (8)",
+    questions: [
+      { label: "من أول السورة", text: "من قوله تعالى: قُلْ أُوحِيَ إِلَيَّ... إلى قوله تعالى: ...رَشَدًا (من الآية 1 إلى الآية 2)", sura: "الجن", url: "https://quran.com/ar/72/1-2" },
+      { label: "من آخر السورة", text: "من قوله تعالى: وَإِنَّهُ لَتَذْكِرَةٌ لِّلْمُتَّقِينَ... إلى قوله تعالى: ...الْعَظِيمِ (من الآية 48 إلى الآية 52)", sura: "الحاقة", url: "https://quran.com/ar/69/48-52" },
+      { label: "من وسط السورة", text: "من قوله تعالى: وَالَّذِينَ فِي أَمْوَالِهِمْ حَقٌّ مَّعْلُومٌ... إلى قوله تعالى: ...مُّشْفِقُونَ (من الآية 24 إلى الآية 27)", sura: "المعارج", url: "https://quran.com/ar/70/24-27" },
+      { label: "سؤال مشهور", text: "من قوله تعالى: قَالَ رَبِّ لَا تَذَرْ... إلى قوله تعالى: ...إِلَّا تَبَارًا (من الآية 26 إلى الآية 28)", sura: "نوح", url: "https://quran.com/ar/71/26-28" },
+      { label: "من أول ربع", text: "من قوله تعالى: إِنَّا أَرْسَلْنَا نُوحًا... إلى قوله تعالى: ...عَذَابٌ أَلِيمٌ (من الآية 1 إلى الآية 4)", sura: "نوح", url: "https://quran.com/ar/71/1-4" }
+    ]
+  },
+  {
+    id: 9, title: "النموذج (9)",
+    questions: [
+      { label: "من أول السورة", text: "من قوله تعالى: الْحَاقَّةُ... إلى قوله تعالى: ...بِالطَّاغِيَةِ (من الآية 1 إلى الآية 5)", sura: "الحاقة", url: "https://quran.com/ar/69/1-5" },
+      { label: "من آخر السورة", text: "من قوله تعالى: فَمَالِ الَّذِينَ كَفَرُوا قِبَلَكَ... إلى قوله تعالى: ...يُوفَضُونَ (من الآية 36 إلى الآية 44)", sura: "المعارج", url: "https://quran.com/ar/70/36-44" },
+      { label: "من وسط السورة", text: "من قوله تعالى: وَأَنَّ الْمَسَاجِدَ لِلَّهِ... إلى قوله تعالى: ...أَحَدًا (من الآية 18 إلى الآية 20)", sura: "الجن", url: "https://quran.com/ar/72/18-20" },
+      { label: "سؤال مشهور", text: "من قوله تعالى: خُذُوهُ فَغُلُّوهُ... إلى قوله تعالى: ...بِاللَّهِ الْعَظِيمِ (من الآية 30 إلى الآية 33)", sura: "الحاقة", url: "https://quran.com/ar/69/30-33" },
+      { label: "من أول ربع", text: "من قوله تعالى: إِنَّ الْإِنسَانَ خُلِقَ هَلُوعًا... إلى قوله تعالى: ...دَائِمُونَ (من الآية 19 إلى الآية 23)", sura: "المعارج", url: "https://quran.com/ar/70/19-23" }
+    ]
+  },
+  {
+    id: 10, title: "النموذج (10)",
+    questions: [
+      { label: "من أول السورة", text: "من قوله تعالى: سَأَلَ سَائِلٌ بِعَذَابٍ وَاقِعٍ... إلى قوله تعالى: ...جَمِيلًا (من الآية 1 إلى الآية 5)", sura: "المعارج", url: "https://quran.com/ar/70/1-5" },
+      { label: "من آخر السورة", text: "من قوله تعالى: قَالَ نُوحٌ رَّبِّ إِنَّهُمْ عَصَوْنِي... إلى قوله تعالى: ...إِلَّا تَبَارًا (من الآية 21 إلى الآية 28)", sura: "نوح", url: "https://quran.com/ar/71/21-28" },
+      { label: "من وسط السورة", text: "من قوله تعالى: وَحُمِلَتِ الْأَرْضُ وَالْجِبَالُ... إلى قوله تعالى: ...خَافِيَةٌ (من الآية 14 إلى الآية 18)", sura: "الحاقة", url: "https://quran.com/ar/69/14-18" },
+      { label: "سؤال مشهور", text: "من قوله تعالى: وَأَنَّا ظَنَنَّا أَن لَّن نُّعجِزَ اللَّهَ... إلى قوله تعالى: ...وَلَا رَهَقًا (من الآية 12 إلى الآية 13)", sura: "الجن", url: "https://quran.com/ar/72/12-13" },
+      { label: "من أول ربع", text: "من قوله تعالى: فَلَا أُقْسِمُ بِمَا تُبْصِرُونَ... إلى قوله تعالى: ...تُؤْمِنُونَ (من الآية 38 إلى الآية 41)", sura: "الحاقة", url: "https://quran.com/ar/69/38-41" }
+    ]
+  },
+  {
+    id: 11, title: "النموذج (11)",
+    questions: [
+      { label: "من أول السورة", text: "من قوله تعالى: إِنَّا أَرْسَلْنَا نُوحًا... إلى قوله تعالى: ...وَلَا تَعْصُونِ (من الآية 1 إلى الآية 6)", surا: "نوح", url: "https://quran.com/ar/71/1-6" },
+      { label: "من آخر السورة", text: "من قوله تعالى: إِلَّا بَلَاغًا مِّنَ اللَّهِ... إلى قوله تعالى: ...عَدَدًا (من الآية 23 إلى الآية 28)", sura: "الجن", url: "https://quran.com/ar/72/23-28" },
+      { label: "من وسط السورة", text: "من قوله تعالى: وَالَّذِينَ يُصَدِّقُونَ بِيَوْمِ الدِّينِ... إلى قوله تعالى: ...غَيْرُ مَأْمُونٍ (من الآية 26 إلى الآية 28)", sura: "المعارج", url: "https://quran.com/ar/70/26-28" },
+      { label: "سؤال مشهور", text: "من قوله تعالى: إِنَّا لَمَّا طَغَى الْمَاءُ... إلى قوله تعالى: ...أُذُنٌ وَاعِيَةٌ (من الآية 11 إلى الآية 12)", sura: "الحاقة", url: "https://quran.com/ar/69/11-12" },
+      { label: "من أول ربع", text: "من قوله تعالى: قُلْ إِنَّمَا أَدْعُو رَبِّي... إلى قوله تعالى: ...عَذَابًا (من الآية 20 إلى الآية 24)", sura: "الجن", url: "https://quran.com/ar/72/20-24" }
+    ]
+  },
+  {
+    id: 12, title: "النموذج (12)",
+    questions: [
+      { label: "من أول السورة", text: "من قوله تعالى: قُلْ أُوحِيَ إِلَيَّ... إلى قوله تعالى: ...كَذِبًا (من الآية 1 إلى الآية 5)", sura: "الجن", url: "https://quran.com/ar/72/1-5" },
+      { label: "من آخر السورة", text: "من قوله تعالى: إِنَّهُ لَقَوْلُ رَسُولٍ كَرِيمٍ... إلى قوله تعالى: ...الْعَظِيمِ (من الآية 40 إلى الآية 52)", sura: "الحاقة", url: "https://quran.com/ar/69/40-52" },
+      { label: "من وسط السورة", text: "من قوله تعالى: قَالَ نُوحٌ رَّبِّ إِنَّهُمْ عَصَوْنِي... إلى قوله تعالى: ...كُبَّارًا (من الآية 21 إلى الآية 24)", sura: "نوح", url: "https://quran.com/ar/71/21-24" },
+      { label: "سؤال مشهور", text: "من قوله تعالى: كَلَّا ۖ إِنَّهَا لَظَىٰ... إلى قوله تعالى: ...وَأَوْعَىٰ (من الآية 15 إلى الآية 18)", sura: "المعارج", url: "https://quran.com/ar/70/15-18" },
+      { label: "من أول ربع", text: "من قوله تعالى: إِنَّ الْإِنسَانَ خُلِقَ هَلُوعًا... إلى قوله تعالى: ...دَائِمُونَ (من الآية 19 إلى الآية 23)", sura: "المعارج", url: "https://quran.com/ar/70/19-23" }
+    ]
+  }
+];
+
+// --- مكون الهيدر (Header) ---
+const Header = () => (
+  <header className="bg-gradient-to-r from-green-800 to-green-700 text-white p-4 shadow-lg w-full" style={{ fontFamily: "'Amiri', serif" }}>
+    <div className="container mx-auto flex justify-between items-center flex-wrap gap-4">
+      {/* القسم الأيمن */}
+      <div className="text-right">
+        <p className="font-bold text-lg">مدرسة القرآن بمنشأة سلطان</p>
+        <p className="text-sm">اختبارات شفوي (الدوري الثاني)</p>
+        <p className="text-xs">للعام القرآني ١٤٤٧ هـ - ٢٠٢٥ م</p>
+      </div>
+      
+      {/* القسم الأوسط */}
+      <div className="text-center flex-grow">
+        <p className="font-bold text-2xl" style={{ textShadow: '1px 1px 2px rgba(0,0,0,0.2)' }}>اختبار مستوى (٥ : ٧) الفرقة الثانية</p>
+        <p className="text-lg">من سورة الحاقة إلى سورة الجن</p>
+      </div>
+      
+      {/* القسم الأيسر */}
+      <div className="text-left italic text-lg hidden lg:block">
+        <p>مدرسة القرآن بمنشأة سلطان</p>
+      </div>
+    </div>
+  </header>
+);
+
+// --- مكون بطاقة النموذج (ModelCard) ---
+const ModelCard = ({ model, onClick }) => {
+  return (
+    <motion.button
+      onClick={() => onClick(model)}
+      className="bg-white p-4 rounded-lg shadow-md hover:shadow-xl transition-all duration-300 text-center cursor-pointer overflow-hidden transform hover:-translate-y-1 border-b-4 border-yellow-500 hover:border-yellow-600"
+      whileHover={{ scale: 1.05 }}
+      whileTap={{ scale: 0.95 }}
+    >
+      <BookOpenIcon className="w-12 h-12 mx-auto text-green-700" />
+      <span className="block mt-2 font-semibold text-lg text-green-800">{model.title}</span>
+    </motion.button>
+  );
+};
+
+// --- صفحة شبكة النماذج (ModelGridPage) ---
+const ModelGridPage = ({ onModelClick }) => (
+  <motion.div
+    className="p-4 md:p-8"
+    initial={{ opacity: 0 }}
+    animate={{ opacity: 1 }}
+    exit={{ opacity: 0 }}
+  >
+    <h2 className="text-3xl font-bold text-green-800 text-center mb-6" style={{ fontFamily: "'Amiri', serif" }}>
+      اختر نموذج الاختبار
+    </h2>
+    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4 md:gap-6">
+      {modelsData.map(model => (
+        <ModelCard key={model.id} model={model} onClick={onModelClick} />
+      ))}
+    </div>
+  </motion.div>
+);
+
+// --- صفحة عرض النموذج (ModelViewPage) ---
+const ModelViewPage = ({ model, onBack, onQuestionSelect, selectedQuestionUrl }) => {
+  return (
+    <motion.div
+      className="p-4 md:p-8"
+      initial={{ opacity: 0, y: 50 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, x: '-100vw' }}
+      transition={{ type: 'spring', stiffness: 100, damping: 20 }}
+    >
+      <button onClick={onBack} className="flex items-center gap-2 bg-yellow-500 text-green-900 px-4 py-2 rounded-lg hover:bg-yellow-600 transition-all duration-300 mb-4 font-semibold">
+         <ArrowRightIcon className="w-5 h-5 transform rotate-180" />
+         <span>العودة للنماذج</span>
+      </button>
+      
+      <div className="flex flex-col md:flex-row gap-6">
+        
+        {/* قائمة الأسئلة (اليمين) */}
+        <div className="w-full md:w-2/5 lg:w-1/3" style={{ direction: 'rtl' }}>
+          <h2 className="text-3xl font-bold text-green-800 text-center mb-4" style={{ fontFamily: "'Amiri', serif" }}>
+            {model.title}
+          </h2>
+          <div className="bg-white rounded-lg shadow-lg overflow-hidden divide-y divide-gray-200">
+            {model.questions.map((q, index) => (
+              <motion.button
+                key={index}
+                onClick={() => onQuestionSelect(q.url)}
+                className={`w-full text-right p-4 transition-all duration-200 block ${selectedQuestionUrl === q.url ? 'bg-yellow-100' : 'hover:bg-gray-100'}`}
+                initial={{ opacity: 0, x: 50 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: index * 0.1 }}
+              >
+                <span className="font-semibold text-lg text-green-700">{q.label}</span>
+                <p className="text-gray-700 mt-1 text-md" style={{ fontFamily: "'Noto Naskh Arabic', serif" }}>
+                  {q.text}
+                </p>
+              </motion.button>
+            ))}
+          </div>
+        </div>
+        
+        {/* عارض المصحف (اليسار) */}
+        <div className="w-full md:w-3/5 lg:w-2/3">
+          <AnimatePresence mode="wait">
+            {!selectedQuestionUrl ? (
+              <motion.div
+                key="placeholder"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="h-[600px] flex items-center justify-center bg-gray-100 rounded-lg shadow-inner border"
+              >
+                <p className="text-xl text-gray-500" style={{ fontFamily: "'Amiri', serif" }}>
+                  الرجاء اختيار سؤال لعرض الآيات
+                </p>
+              </motion.div>
+            ) : (
+              <motion.div
+                key={selectedQuestionUrl} // تغيير المفتاح لإعادة تشغيل الأنيميشن
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0 }}
+                className="w-full"
+              >
+                <iframe
+                  src={selectedQuestionUrl}
+                  className="w-full h-[600px] border-4 border-yellow-500 rounded-lg shadow-lg"
+                  title="Quran Viewer"
+                  allowFullScreen
+                ></iframe>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+        
+      </div>
+    </motion.div>
+  );
+};
+
+// --- المكون الرئيسي للتطبيق (App) ---
+export default function App() {
+  const [currentPage, setCurrentPage] = useState('home'); // 'home' | 'model'
+  const [selectedModel, setSelectedModel] = useState(null);
+  const [selectedQuestionUrl, setSelectedQuestionUrl] = useState(null);
+
+  useEffect(() => {
+    document.title = "اختبارات شفوي - مدرسة القرآن بمنشأة سلطان";
+  }, []);
+
+  const handleModelClick = (model) => {
+    setSelectedModel(model);
+    setCurrentPage('model');
+    setSelectedQuestionUrl(null); // مسح السؤال عند اختيار نموذج جديد
+  };
+  
+  const handleBackToHome = () => {
+    setCurrentPage('home');
+    setSelectedModel(null);
+    setSelectedQuestionUrl(null);
+  };
+  
+  const handleQuestionSelect = (url) => {
+    setSelectedQuestionUrl(url);
+  };
+  
+  return (
+    <div className="min-h-screen bg-green-50 text-green-900" style={{ direction: 'rtl' }}>
+      {/* تحميل الخطوط */}
+      <style>
+        {`
+          @import url('https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&display=swap');
+          @import url('https://fonts.googleapis.com/css2?family=Noto+Naskh+Arabic:wght@400;700&display=swap');
+          
+          body, html {
+            font-family: 'Noto Naskh Arabic', serif;
+          }
+        `}
+      </style>
+      
+      <Header />
+      
+      <main className="container mx-auto">
+        <AnimatePresence mode="wait">
+          {currentPage === 'home' && (
+            <ModelGridPage 
+              key="home"
+              onModelClick={handleModelClick} 
+            />
+          )}
+          {currentPage === 'model' && selectedModel && (
+            <ModelViewPage 
+              key="model"
+              model={selectedModel} 
+              onBack={handleBackToHome} 
+              onQuestionSelect={handleQuestionSelect}
+              selectedQuestionUrl={selectedQuestionUrl}
+            />
+          )}
+        </AnimatePresence>
+      </main>
+    </div>
+  );
+}
