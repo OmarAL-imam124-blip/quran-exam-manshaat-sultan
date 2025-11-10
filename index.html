@@ -1,0 +1,596 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>الاختبار الدوري الثاني - الحاقة إلى الجن</title>
+    <!-- استيراد الخطوط المطلوبة -->
+    <link href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+    
+    <style>
+        /* --- الإعدادات العامة والتصميم الأساسي --- */
+        :root {
+            --bg-color: #fdfaf6; /* بيج فاتح مائل للذهبي */
+            --header-bg: #6a4029; /* بني غامق */
+            --header-text: #fdfaf6;
+            --btn-bg: #8b5a3e; /* بني متوسط */
+            --btn-hover: #6a4029;
+            --text-color: #6a4029; /* بني غامق للنصوص */
+            --gold-color: #D4AF37; /* ذهبي */
+            --dark-gold: #a17b2b; /* ذهبي قاتم */
+            --border-color: #e0d9cf;
+            --panel-bg: #fffbeb; /* خلفية لوحة الآيات */
+            --panel-border: #d4cba9;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Amiri', serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.7;
+            font-size: 1.1rem;
+        }
+
+        /* --- الشريط العلوي الثابت --- */
+        .main-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: var(--header-bg);
+            color: var(--header-text);
+            padding: 15px 25px;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            min-height: 90px;
+        }
+
+        .header-left {
+            text-align: right;
+            font-size: 0.9rem;
+            line-height: 1.4;
+        }
+        .header-left h3 {
+            font-size: 1rem;
+            font-weight: normal;
+        }
+
+        .header-center {
+            text-align: center;
+        }
+        .header-center h1 {
+            font-size: 1.8rem;
+            font-weight: 700;
+        }
+
+        .header-right {
+             /* عنصر وهمي للموازنة */
+            width: 150px; /* يجب أن يساوي عرض العنصر الأيسر تقريبًا */
+        }
+
+
+        /* --- شريط التنقل للنماذج --- */
+        .models-nav {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            padding: 10px;
+            background-color: #fff;
+            border-bottom: 2px solid var(--border-color);
+        }
+
+        .nav-btn {
+            background-color: var(--btn-bg);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            padding: 8px 15px;
+            margin: 5px;
+            font-family: 'Amiri', serif;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background-color 0.3s ease, box-shadow 0.3s ease;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .nav-btn:hover {
+            background-color: var(--btn-hover);
+        }
+
+        .nav-btn.active {
+            background-color: var(--dark-gold);
+            color: #fff;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.2) inset;
+        }
+
+        /* --- حاوية المحتوى الرئيسية --- */
+        .container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 0 15px;
+        }
+        
+        #current-model-title {
+            text-align: center;
+            font-size: 2rem;
+            color: var(--text-color);
+            margin-bottom: 20px;
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 10px;
+        }
+        
+        .content-wrapper {
+            display: flex;
+            flex-direction: row;
+            gap: 20px;
+        }
+
+        /* --- قائمة الأسئلة --- */
+        .questions-list {
+            flex: 2; /* تأخذ ثلثي العرض */
+        }
+
+        .question-btn {
+            display: block;
+            width: 100%;
+            background-color: #ffffff;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 18px 25px;
+            margin-bottom: 10px;
+            font-family: 'Amiri', serif;
+            font-size: 1.3rem;
+            color: var(--text-color);
+            text-align: right;
+            cursor: pointer;
+            transition: background-color 0.3s ease, border-color 0.3s ease;
+        }
+
+        .question-btn:hover {
+            background-color: var(--bg-color);
+            border-color: var(--dark-gold);
+        }
+        
+        .question-btn.active {
+            background-color: var(--panel-bg);
+            border-color: var(--dark-gold);
+            box-shadow: 0 0 5px var(--dark-gold);
+        }
+
+        /* --- لوحة عرض الآيات --- */
+        .quran-display {
+            flex: 1; /* تأخذ ثلث العرض */
+            background-color: var(--panel-bg);
+            border: 1px solid var(--panel-border);
+            border-radius: 8px;
+            padding: 20px;
+            height: fit-content;
+            position: sticky;
+            top: 110px; /* تحت الشريط العلوي */
+            opacity: 0;
+            transform: translateY(10px);
+            visibility: hidden;
+            transition: opacity 0.4s ease, transform 0.4s ease, visibility 0.4s;
+        }
+        
+        .quran-display.visible {
+            opacity: 1;
+            transform: translateY(0);
+            visibility: visible;
+        }
+
+        #panel-title {
+            font-size: 1.4rem;
+            color: var(--header-bg);
+            padding-bottom: 10px;
+            border-bottom: 2px solid var(--panel-border);
+            margin-bottom: 15px;
+        }
+        
+        #panel-content p {
+            font-size: 1.6rem;
+            color: #000;
+            line-height: 2.2;
+            text-align: justify;
+        }
+        
+        #panel-content p span {
+            color: var(--dark-gold);
+            font-size: 1.1rem;
+            margin-left: 5px;
+        }
+
+        /* --- أداة التحميل (Spinner) --- */
+        .loader {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid var(--btn-bg);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* --- التذييل --- */
+        footer {
+            text-align: center;
+            padding: 30px 20px;
+            margin-top: 40px;
+            border-top: 2px solid var(--border-color);
+            background-color: #fff;
+        }
+
+        footer p {
+            color: var(--dark-gold);
+            font-size: 1.2rem;
+            font-weight: 700;
+        }
+        
+        /* --- تصميم متجاوب (Responsive) --- */
+        @media (max-width: 900px) {
+            .content-wrapper {
+                flex-direction: column;
+            }
+            .quran-display {
+                position: static;
+                width: 100%;
+                margin-top: 10px;
+            }
+        }
+        
+        @media (max-width: 600px) {
+            .main-header {
+                flex-direction: column;
+                padding: 10px;
+                min-height: auto;
+            }
+            .header-center h1 {
+                font-size: 1.5rem;
+                padding: 10px 0;
+            }
+            .header-left, .header-right {
+                width: 100%;
+                text-align: center;
+            }
+            .header-right {
+                display: none; /* إخفاء العنصر الوهمي */
+            }
+            .quran-display {
+                /* جعل اللوحة تلتصق تحت الهيدر في الموبايل */
+                position: sticky;
+                top: 135px; /* يعتمد على ارتفاع الهيدر وشريط التنقل */
+            }
+            #panel-content p {
+                font-size: 1.4rem;
+                line-height: 2;
+            }
+            .question-btn {
+                font-size: 1.15rem;
+                padding: 15px 20px;
+            }
+        }
+
+    </style>
+</head>
+<body>
+
+    <!-- رأس الصفحة -->
+    <header class="main-header">
+        <div class="header-left">
+            <h3>مدرسة القرآن الكريم بمنشأة سلطان</h3>
+            <h3>الاختبار الدوري الثاني</h3>
+        </div>
+        <div class="header-center">
+            <h1>الاختبار الدوري الثاني للمستوى من 5 إلى 7</h1>
+            <h2>من سورة الحاقة إلى سورة الجن</h2>
+        </div>
+        <div class="header-right">
+             <!-- عنصر موازنة لـ header-left -->
+        </div>
+    </header>
+
+    <!-- شريط التنقل للنماذج -->
+    <nav class="models-nav" id="models-nav">
+        <!-- سيتم ملؤه بواسطة JavaScript -->
+    </nav>
+
+    <!-- حاوية المحتوى الرئيسية -->
+    <main class="container">
+        <h2 id="current-model-title"></h2>
+        <div class="content-wrapper">
+            <!-- قائمة الأسئلة -->
+            <div class="questions-list" id="questions-list">
+                <!-- سيتم ملؤه بواسطة JavaScript -->
+            </div>
+
+            <!-- لوحة عرض الآيات -->
+            <div class="quran-display" id="quran-display-panel">
+                <h3 id="panel-title">الآيات المطلوبة</h3>
+                <div id="panel-content">
+                    <p>الرجاء اختيار سؤال لعرض الآيات...</p>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- التذييل -->
+    <footer>
+        <p>إعداد وإشراف: المعلم – موقع مدرسة القرآن الكريم بمنشأة سلطان</p>
+    </footer>
+
+    <script>
+        // --- 1. بيانات النماذج (12 نموذجًا جديدًا) ---
+        // تم إنشاؤها وفق الضوابط المطلوبة (6-7 آيات، توزيع: أول، وسط، آخر، ربع، مشهور)
+        const modelsData = [
+            // النموذج 1 (يبدأ بالحاقة)
+            {
+                title: "النموذج (1)",
+                questions: [
+                    { q: "السؤال الأول (أول السورة)", sura: 69, from: 1, to: 7, text: "من قوله تعالى: «الْحَاقَّةُ»..." },
+                    { q: "السؤال الثاني (وسط السورة)", sura: 70, from: 19, to: 25, text: "من قوله تعالى: «إِنَّ الْإِنسَانَ خُلِقَ هَلُوعًا»..." },
+                    { q: "السؤال الثالث (آخر السورة)", sura: 71, from: 21, to: 28, text: "من قوله تعالى: «قَالَ نُوحٌ رَّبِّ إِنَّهُمْ عَصَوْنِي»..." },
+                    { q: "السؤال الرابع (ربع أول)", sura: 72, from: 1, to: 7, text: "من قوله تعالى: «قُلْ أُوحِيَ إِلَيَّ أَنَّهُ اسْتَمَعَ»..." },
+                    { q: "السؤال الخامس (مشهور)", sura: 69, from: 19, to: 25, text: "من قوله تعالى: «فَأَمَّا مَنْ أُوتِيَ كِتَابَهُ بِيَمِينِهِ»..." }
+                ]
+            },
+            // النموذج 2 (يبدأ بالمعارج)
+            {
+                title: "النموذج (2)",
+                questions: [
+                    { q: "السؤال الأول (أول السورة)", sura: 70, from: 1, to: 7, text: "من قوله تعالى: «سَأَلَ سَائِلٌ بِعَذَابٍ وَاقِعٍ»..." },
+                    { q: "السؤال الثاني (وسط السورة)", sura: 71, from: 10, to: 16, text: "من قوله تعالى: «فَقُلْتُ اسْتَغْفِرُوا رَبَّكُمْ»..." },
+                    { q: "السؤال الثالث (آخر السورة)", sura: 72, from: 22, to: 28, text: "من قوله تعالى: «قُلْ إِنِّي لَن يُجِيرَنِي مِنَ اللَّهِ»..." },
+                    { q: "السؤال الرابع (ربع أول)", sura: 69, from: 9, to: 15, text: "من قوله تعالى: «وَجَاءَ فِرْعَوْنُ وَمَن قَبْلَهُ»..." },
+                    { q: "السؤال الخامس (مشهور)", sura: 70, from: 11, to: 18, text: "من قوله تعالى: «يُبَصَّرُونَهُمْ ۚ يَوَدُّ الْمُجْرِمُ»..." }
+                ]
+            },
+            // النموذج 3 (يبدأ بنوح)
+            {
+                title: "النموذج (3)",
+                questions: [
+                    { q: "السؤال الأول (أول السورة)", sura: 71, from: 1, to: 7, text: "من قوله تعالى: «إِنَّا أَرْسَلْنَا نُوحًا إِلَىٰ قَوْمِهِ»..." },
+                    { q: "السؤال الثاني (وسط السورة)", sura: 72, from: 8, to: 14, text: "من قوله تعالى: «وَأَنَّا لَمَسْنَا السَّمَاءَ»..." },
+                    { q: "السؤال الثالث (آخر السورة)", sura: 69, from: 44, to: 52, text: "من قوله تعالى: «وَلَوْ تَقَوَّلَ عَلَيْنَا»..." },
+                    { q: "السؤال الرابع (ربع أول)", sura: 70, from: 8, to: 14, text: "من قوله تعالى: «يَوْمَ تَكُونُ السَّمَاءُ كَالْمُهْلِ»..." },
+                    { q: "السؤال الخامس (مشهور)", sura: 71, from: 5, to: 12, text: "من قوله تعالى: «قَالَ رَبِّ إِنِّي دَعَوْتُ قَوْمِي»..." }
+                ]
+            },
+            // النموذج 4 (يبدأ بالجن)
+            {
+                title: "النموذج (4)",
+                questions: [
+                    { q: "السؤال الأول (أول السورة)", sura: 72, from: 1, to: 6, text: "من قوله تعالى: «قُلْ أُوحِيَ إِلَيَّ أَنَّهُ اسْتَمَعَ»..." },
+                    { q: "السؤال الثاني (وسط السورة)", sura: 69, from: 25, to: 31, text: "من قوله تعالى: «وَأَمَّا مَنْ أُوتِيَ كِتَابَهُ بِشِمَالِهِ»..." },
+                    { q: "السؤال الثالث (آخر السورة)", sura: 70, from: 36, to: 44, text: "من قوله تعالى: «فَمَالِ الَّذِينَ كَفَرُوا قِبَلَكَ»..." },
+                    { q: "السؤال الرابع (ربع أول)", sura: 71, from: 1, to: 7, text: "من قوله تعالى: «إِنَّا أَرْسَلْنَا نُوحًا»..." },
+                    { q: "السؤال الخامس (مشهور)", sura: 72, from: 13, to: 19, text: "من قوله تعالى: «وَأَنَّا لَمَّا سَمِعْنَا الْهُدَىٰ»..." }
+                ]
+            },
+            // النموذج 5 (يبدأ بالحاقة)
+            {
+                title: "النموذج (5)",
+                questions: [
+                    { q: "السؤال الأول (أول السورة)", sura: 69, from: 1, to: 8, text: "من قوله تعالى: «الْحَاقَّةُ»..." },
+                    { q: "السؤال الثاني (وسط السورة)", sura: 72, from: 15, to: 21, text: "من قوله تعالى: «وَأَمَّا الْقَاسِطُونَ فَكَانُوا»..." },
+                    { q: "السؤال الثالث (آخر السورة)", sura: 71, from: 21, to: 28, text: "من قوله تعالى: «قَالَ نُوحٌ رَّبِّ إِنَّهُمْ عَصَوْنِي»..." },
+                    { q: "السؤال الرابع (ربع أول)", sura: 70, from: 1, to: 7, text: "من قوله تعالى: «سَأَلَ سَائِلٌ بِعَذَابٍ وَاقِعٍ»..." },
+                    { q: "السؤال الخامس (مشهور)", sura: 69, from: 13, to: 18, text: "من قوله تعالى: «فَإِذَا نُفِخَ فِي الصُّورِ»..." }
+                ]
+            },
+            // النموذج 6 (يبدأ بالمعارج)
+            {
+                title: "النموذج (6)",
+                questions: [
+                    { q: "السؤال الأول (أول السورة)", sura: 70, from: 1, to: 8, text: "من قوله تعالى: «سَأَلَ سَائِلٌ بِعَذَابٍ وَاقِعٍ»..." },
+                    { q: "السؤال الثاني (وسط السورة)", sura: 69, from: 30, to: 37, text: "من قوله تعالى: «خُذُوهُ فَغُلُّوهُ»..." },
+                    { q: "السؤال الثالث (آخر السورة)", sura: 72, from: 22, to: 28, text: "من قوله تعالى: «قُلْ إِنِّي لَن يُجِيرَنِي»..." },
+                    { q: "السؤال الرابع (ربع أول)", sura: 71, from: 1, to: 6, text: "من قوله تعالى: «إِنَّا أَرْسَلْنَا نُوحًا»..." },
+                    { q: "السؤال الخامس (مشهور)", sura: 70, from: 19, to: 26, text: "من قوله تعالى: «إِنَّ الْإِنسَانَ خُلِقَ هَلُوعًا»..." }
+                ]
+            },
+            // النموذج 7 (يبدأ بنوح)
+            {
+                title: "النموذج (7)",
+                questions: [
+                    { q: "السؤال الأول (أول السورة)", sura: 71, from: 1, to: 7, text: "من قوله تعالى: «إِنَّا أَرْسَلْنَا نُوحًا إِلَىٰ قَوْمِهِ»..." },
+                    { q: "السؤال الثاني (وسط السورة)", sura: 69, from: 19, to: 24, text: "من قوله تعالى: «فَأَمَّا مَنْ أُوتِيَ كِتَابَهُ بِيَمِينِهِ»..." },
+                    { q: "السؤال الثالث (آخر السورة)", sura: 70, from: 38, to: 44, text: "من قوله تعالى: «أَيَطْمَعُ كُلُّ امْرِئٍ مِّنْهُمْ»..." },
+                    { q: "السؤال الرابع (ربع أول)", sura: 72, from: 1, to: 7, text: "من قوله تعالى: «قُلْ أُوحِيَ إِلَيَّ أَنَّهُ اسْتَمَعَ»..." },
+                    { q: "السؤال الخامس (مشهور)", sura: 71, from: 13, to: 20, text: "من قوله تعالى: «مَّا لَكُمْ لَا تَرْجُونَ لِلَّهِ وَقَارًا»..." }
+                ]
+            },
+            // النموذج 8 (يبدأ بالجن)
+            {
+                title: "النموذج (8)",
+                questions: [
+                    { q: "السؤال الأول (أول السورة)", sura: 72, from: 1, to: 7, text: "من قوله تعالى: «قُلْ أُوحِيَ إِلَيَّ أَنَّهُ اسْتَمَعَ»..." },
+                    { q: "السؤال الثاني (وسط السورة)", sura: 71, from: 7, to: 13, text: "من قوله تعالى: «وَإِنِّي كُلَّمَا دَعَوْتُهُمْ لِتَغْفِرَ»..." },
+                    { q: "السؤال الثالث (آخر السورة)", sura: 69, from: 43, to: 52, text: "من قوله تعالى: «تَنزِيلٌ مِّن رَّبِّ الْعَالَمِينَ»..." },
+                    { q: "السؤال الرابع (ربع أول)", sura: 70, from: 1, to: 6, text: "من قوله تعالى: «سَأَلَ سَائِلٌ بِعَذَابٍ وَاقِعٍ»..." },
+                    { q: "السؤال الخامس (مشهور)", sura: 72, from: 18, to: 24, text: "من قوله تعالى: «وَأَنَّ الْمَسَاجِدَ لِلَّهِ»..." }
+                ]
+            },
+            // النموذج 9 (يبدأ بالحاقة)
+            {
+                title: "النموذج (9)",
+                questions: [
+                    { q: "السؤال الأول (أول السورة)", sura: 69, from: 1, to: 8, text: "من قوله تعالى: «الْحَاقَّةُ»..." },
+                    { q: "السؤال الثاني (وسط السورة)", sura: 70, from: 26, to: 32, text: "من قوله تعالى: «وَالَّذِينَ يُصَدِّقُونَ بِيَوْمِ الدِّينِ»..." },
+                    { q: "السؤال الثالث (آخر السورة)", sura: 71, from: 21, to: 28, text: "من قوله تعالى: «قَالَ نُوحٌ رَّبِّ إِنَّهُمْ عَصَوْنِي»..." },
+                    { q: "السؤال الرابع (ربع أول)", sura: 72, from: 1, to: 7, text: "من قوله تعالى: «قُلْ أُوحِيَ إِلَيَّ أَنَّهُ اسْتَمَعَ»..." },
+                    { q: "السؤال الخامس (مشهور)", sura: 69, from: 25, to: 32, text: "من قوله تعالى: «وَأَمَّا مَنْ أُوتِيَ كِتَابَهُ بِشِمَالِهِ»..." }
+                ]
+            },
+            // النموذج 10 (يبدأ بالمعارج)
+            {
+                title: "النموذج (10)",
+                questions: [
+                    { q: "السؤال الأول (أول السورة)", sura: 70, from: 1, to: 7, text: "من قوله تعالى: «سَأَلَ سَائِلٌ بِعَذَابٍ وَاقِعٍ»..." },
+                    { q: "السؤال الثاني (وسط السورة)", sura: 72, from: 10, to: 16, text: "من قوله تعالى: «وَأَنَّا لَا نَدْرِي أَشَرٌّ أُرِيدَ»..." },
+                    { q: "السؤال الثالث (آخر السورة)", sura: 69, from: 44, to: 52, text: "من قوله تعالى: «وَلَوْ تَقَوَّلَ عَلَيْنَا»..." },
+                    { q: "السؤال الرابع (ربع أول)", sura: 71, from: 1, to: 7, text: "من قوله تعالى: «إِنَّا أَرْسَلْنَا نُوحًا»..." },
+                    { q: "السؤال الخامس (مشهور)", sura: 70, from: 11, to: 18, text: "من قوله تعالى: «يُبَصَّرُونَهُمْ ۚ يَوَدُّ الْمُجْرِمُ»..." }
+                ]
+            },
+            // النموذج 11 (يبدأ بنوح)
+            {
+                title: "النموذج (11)",
+                questions: [
+                    { q: "السؤال الأول (أول السورة)", sura: 71, from: 1, to: 7, text: "من قوله تعالى: «إِنَّا أَرْسَلْنَا نُوحًا إِلَىٰ قَوْمِهِ»..." },
+                    { q: "السؤال الثاني (وسط السورة)", sura: 69, from: 18, to: 24, text: "من قوله تعالى: «يَوْمَئِذٍ تُعْرَضُونَ لَا تَخْفَىٰ»..." },
+                    { q: "السؤال الثالث (آخر السورة)", sura: 72, from: 22, to: 28, text: "من قوله تعالى: «قُلْ إِنِّي لَن يُجِيرَنِي»..." },
+                    { q: "السؤال الرابع (ربع أول)", sura: 70, from: 1, to: 7, text: "من قوله تعالى: «سَأَلَ سَائِلٌ بِعَذَابٍ وَاقِعٍ»..." },
+                    { q: "السؤال الخامس (مشهور)", sura: 71, from: 17, to: 24, text: "من قوله تعالى: «وَاللَّهُ أَنبَتَكُم مِّنَ الْأَرْضِ نَبَاتًا»..." }
+                ]
+            },
+            // النموذج 12 (يبدأ بالجن)
+            {
+                title: "النموذج (12)",
+                questions: [
+                    { q: "السؤال الأول (أول السورة)", sura: 72, from: 1, to: 7, text: "من قوله تعالى: «قُلْ أُوحِيَ إِلَيَّ أَنَّهُ اسْتَمَعَ»..." },
+                    { q: "السؤال الثاني (وسط السورة)", sura: 70, from: 19, to: 25, text: "من قوله تعالى: «إِنَّ الْإِنسَانَ خُلِقَ هَلُوعًا»..." },
+                    { q: "السؤال الثالث (آخر السورة)", sura: 69, from: 38, to: 45, text: "من قوله تعالى: «فَلَا أُقْسِمُ بِمَا تُبْصِرُونَ»..." },
+                    { q: "السؤال الرابع (ربع أول)", sura: 69, from: 1, to: 8, text: "من قوله تعالى: «الْحَاقَّةُ»..." },
+                    { q: "السؤال الخامس (مشهور)", sura: 72, from: 18, to: 24, text: "من قوله تعالى: «وَأَنَّ الْمَسَاجِدَ لِلَّهِ»..." }
+                ]
+            }
+        ];
+
+
+        // --- 2. إعدادات JavaScript ---
+        
+        let activeModelBtn = null;
+        let activeQuestionBtn = null;
+
+        document.addEventListener("DOMContentLoaded", function() {
+            // جلب العناصر الرئيسية
+            const modelsNav = document.getElementById('models-nav');
+            const questionsList = document.getElementById('questions-list');
+            const quranPanel = document.getElementById('quran-display-panel');
+            const panelTitle = document.getElementById('panel-title');
+            const panelContent = document.getElementById('panel-content');
+            const currentModelTitle = document.getElementById('current-model-title');
+
+            // --- أ. إنشاء أزرار التنقل للنماذج ---
+            function createNavButtons() {
+                modelsData.forEach((model, index) => {
+                    const btn = document.createElement('button');
+                    btn.className = 'nav-btn';
+                    btn.textContent = model.title;
+                    btn.addEventListener('click', () => {
+                        loadModel(index);
+                        // تحديث الزر النشط
+                        if (activeModelBtn) {
+                            activeModelBtn.classList.remove('active');
+                        }
+                        btn.classList.add('active');
+                        activeModelBtn = btn;
+                    });
+                    modelsNav.appendChild(btn);
+                });
+            }
+
+            // --- ب. تحميل أسئلة النموذج المحدد ---
+            function loadModel(index) {
+                const model = modelsData[index];
+                currentModelTitle.textContent = model.title;
+                questionsList.innerHTML = ''; // إفراغ القائمة
+                
+                // إخفاء اللوحة عند تغيير النموذج
+                quranPanel.classList.remove('visible');
+                activeQuestionBtn = null;
+
+                model.questions.forEach(question => {
+                    const btn = document.createElement('button');
+                    btn.className = 'question-btn';
+                    btn.textContent = question.text;
+                    // تخزين بيانات السؤال في الزر
+                    btn.dataset.sura = question.sura;
+                    btn.dataset.from = question.from;
+                    btn.dataset.to = question.to;
+                    btn.dataset.title = question.q; // عنوان السؤال
+
+                    btn.addEventListener('click', () => handleQuestionClick(btn, question));
+                    questionsList.appendChild(btn);
+                });
+            }
+
+            // --- ج. معالجة الضغط على السؤال ---
+            function handleQuestionClick(btn, question) {
+                // إذا كان السؤال الحالي هو المفتوح، أغلقه
+                if (btn === activeQuestionBtn) {
+                    quranPanel.classList.remove('visible');
+                    activeQuestionBtn.classList.remove('active');
+                    activeQuestionBtn = null;
+                } else {
+                    // إذا كان سؤال آخر، قم بتفعيله
+                    if (activeQuestionBtn) {
+                        activeQuestionBtn.classList.remove('active');
+                    }
+                    btn.classList.add('active');
+                    activeQuestionBtn = btn;
+
+                    // إظهار اللوحة وجلب البيانات
+                    quranPanel.classList.add('visible');
+                    panelTitle.textContent = question.q; // استخدام عنوان السؤال
+                    fetchAyahs(question.sura, question.from, question.to);
+                }
+            }
+
+            // --- د. جلب الآيات من API ---
+            async function fetchAyahs(sura, from, to) {
+                // إظهار مؤشر التحميل
+                panelContent.innerHTML = '<div class="loader"></div>';
+                
+                const limit = to - from + 1;
+                const offset = from - 1;
+                // استخدام API الذي يدعم offset و limit
+                const url = `https://api.alquran.cloud/v1/surah/${sura}?offset=${offset}&limit=${limit}`;
+
+                try {
+                    const response = await fetch(url);
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    const data = await response.json();
+
+                    if (data.status === 'OK') {
+                        const ayahs = data.data.ayahs;
+                        // تجميع الآيات مع أرقامها
+                        let html = ayahs.map(ayah => 
+                            `<p>${ayah.text} <span>(${ayah.numberInSurah})</span></p>`
+                        ).join('');
+                        panelContent.innerHTML = html;
+                    } else {
+                        throw new Error('API status not OK');
+                    }
+                } catch (error) {
+                    console.error('Error fetching ayahs:', error);
+                    panelContent.innerHTML = '<p style="color: red;">خطأ في جلب الآيات. الرجاء المحاولة مرة أخرى.</p>';
+                }
+            }
+
+            // --- هـ. بدء التشغيل ---
+            createNavButtons();
+            // تحميل النموذج الأول افتراضيًا وتفعيله
+            if (modelsNav.children.length > 0) {
+                modelsNav.children[0].click();
+            }
+
+        });
+    </script>
+
+</body>
+</html>
